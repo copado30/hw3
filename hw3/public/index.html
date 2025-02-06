@@ -1,0 +1,80 @@
+<!-- Author: Rafael Copado -->
+<!-- Used mdn we docs and W3Schools -->
+<!-- link for mdn: https://developer.mozilla.org/en-US/docs/Web/CSS/vertical-align -->
+
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <h1>Cheesecake Order Form</h1>
+            <script
+            src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"/>
+            </script>
+    </head>
+
+    <body>
+
+        <link href="./stylesheets/copado27.css" rel="stylesheet">
+        
+
+        <img src="https://upload.wikimedia.org/wikipedia/commons/9/9c/Mondays_at_Il_Forno_-_Cheesecake_with_strawberry_sauce.jpg" 
+        alt="Cheesecake Image" width = 250px height = 250px>
+
+        <div id="order-form">
+        <p>Quantity Topping</p>
+
+        <!-- code below creates the drop down -->
+        <select name="Numbers" id="Numbers">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+        </select>
+
+        <!-- code below creates the radio group -->
+        <!-- div style line aligns the radio group -->
+
+        <div style="display: inline-block; vertical-align: top;">
+        <input type="radio" id="Button1" name="toppings" value="Plain">
+        <label for="Button1">Plain</label><br>
+
+        <input type="radio" id="Button2" name="toppings" value="Cherry">
+        <label for="Button2">Cherry</label><br>  
+
+        <input type="radio" id="Button3" name="toppings" value="Chocolate">
+        <label for="Button3">Chocolate</label>
+        </div>
+
+        <!-- code below creates the text box -->
+        <p>Notes:</p>
+        <textarea id="Notes" name="Notes" rows="5" cols="60">
+        Enter any special instructions here</textarea><br>
+
+        <button id="order-button">Order</button><br>
+        </div><!-- end of the things that get hidden when an order is placed -->
+
+
+        <div class="dropdown">
+            Total Orders Last
+            <button class="dropdown-button">
+                <span id="selected-month">Month</span>
+            </button>
+            <div class="dropdown-content" id="month-list"></div>
+        </div>
+        
+
+
+        <!-- code below creates the bullet points -->
+        <h4></h4><!-- changing the size of the font-->
+        <ul>
+            <li>11 cherry</li>
+            
+            <li>17 chocolate</li>
+            
+            <li>31 plain</li>
+        </ul>
+	
+	<script src="./javascripts/copado27.js"></script>
+    </body>
+
+</html>

@@ -1,0 +1,50 @@
+/* 
+Author: Rafael Copado
+*/
+body{background-color: antiquewhite;}
+h1{background-color: white;}
+p{font-family:monospace ;}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+.dropdown-button {
+    background: skyblue;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background: white;
+    border-radius: 5px;
+    min-width: 100px;
+    left: 75%;
+    transform: translate(-50%);
+    text-align: center;
+    max-height: 75px; /* Limits dropdown height */
+    overflow-y: auto;  /* Enables vertical scrolling */
+}
+.dropdown-content a {
+    display: block;
+    padding: 8px;
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+.dropdown-content a:hover {
+    background: white;
+}
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+/* Styling for selected month display */
+#selected-month {
+    margin-left: 10px;
+    font-weight: bold;
+    color: black;
+}
