@@ -1,41 +1,69 @@
+$(document).ready(function () {
+    // Populate the month dropdown
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthList = $("#month-list");
+    const selectedMonth = $("#selected-month");
+    const ordersDisplay = $("#orders-display"); // Element to display JSON data
 
+    months.forEach(month => {
+        let monthOption = $("<a>").text(month).attr("href", "#").click(function() {
+            selectedMonth.text(month); // Update the displayed month
 
-const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            const monthList = document.getElementById('month-list');
-            const selectedMonth = document.getElementById('selected-month');
-    
-            months.forEach(month => {
-                const monthOption = document.createElement('a');
-                monthOption.textContent = month;
-                monthOption.href = "#";
-                monthOption.onclick = function() {
-                    selectedMonth.textContent = month; // Update the displayed month
-                };
-                monthList.appendChild(monthOption);
+            // Issue a POST request to fetch orders
+            $.post('/orders', { month: month }, function(data) {
+                updateOrdersDisplay(data);
+            }).fail(function(error) {
+                console.error('Error fetching orders:', error);
+                alert('Failed to fetch orders. Please try again.');
             });
+        });
+        monthList.append(monthOption);
+    });
 
-                document.getElementById('order-button').addEventListener('click', function() {
-                const notes = document.getElementById('Notes').value.toLowerCase();
-                const quantity = document.getElementById('Numbers').value;
-                const topping = document.querySelector('input[name="toppings"]:checked');
+    // Function to update the orders display at the bottom
+    function updateOrdersDisplay(orders) {
+        ordersDisplay.empty(); // Clear previous content
+        ordersDisplay.append("<h3>Orders:</h3>");
+        orders.forEach(order => {
+            ordersDisplay.append(`<p>Topping: ${order.topping}, Quantity: ${order.quantity}</p>`);
+        });
+    }
 
-                if (notes.includes('vegan')) {
-                    alert("Warning: Cheesecakes contain dairy.");
-                    return;
-                }
+    // Form Submission Handling
+    $("#order-button").click(function(event) {
+        event.preventDefault();
 
-                if (!topping) {
-                    alert("Please select a topping.");
-                    return;
-                }
+        const notes = $("#Notes").val().toLowerCase();
+        const quantity = $("#Numbers").val();
+        const topping = $('input[name="toppings"]:checked').val();
 
-                document.getElementById('order-form').innerHTML = `
-                    <h2>Thank you! Your order has been placed.</h2>
-                    <p><strong>Topping:</strong> ${topping.value}</p>
-                    <p><strong>Quantity:</strong> ${quantity}</p>
-                    <p><strong>Notes:</strong> ${notes || "None"}</p>`;
-            });
+        // Validate vegan warning
+        if (notes.includes('vegan')) {
+            alert("Warning: Cheesecakes contain dairy.");
+            return;
+        }
 
+        // Ensure a topping is selected
+        if (!topping) {
+            alert("Please select a topping.");
+            return;
+        }
 
+        // Issue a POST request to submit the order
+        $.post('/orders', { topping: topping, quantity: quantity, notes: notes }, function(response) {
+            updateOrdersDisplay(response);
+        }).fail(function(error) {
+            console.error('Error submitting order:', error);
+            alert('Failed to submit order. Please try again.');
+        });
 
+        // Replace order form with confirmation message
+        $("#order-form").html(`
+            <h2>Thank you! Your order has been placed.</h2>
+            <p><strong>Topping:</strong> ${topping}</p>
+            <p><strong>Quantity:</strong> ${quantity}</p>
+            <p><strong>Notes:</strong> ${notes || "None"}</p>
+        `);
+    });
+});
 
