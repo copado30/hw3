@@ -1,38 +1,46 @@
-var express = require("express");
-var router = express.Router();
+const express = require("express");
+const router = express.Router();
 const dbms = require("./dbms.js");
 
-router.post("/", function (req, res, next) {
-    const { topping, quantity, notes } = req.body;
-
-    if (!topping || !quantity || !notes) {
-        return res.status(400).json({ error: "Topping, quantity, and notes are required" });
+router.post("/", function(req, res) {
+    const { t_id, quantity, notes, month, year } = req.body;
+    
+    // Input validation
+    if ([t_id, quantity, month, year].some(Number.isNaN)) {
+        return res.status(400).json({ 
+            error: "Invalid input",
+            details: "t_id, quantity, month, and year must be numbers"
+        });
     }
 
-    // Map topping names to their IDs (you can adjust this based on your toppings table)
-    const toppingMap = {
-        'Plain': 1,
-        'Vegan': 2,
-        'Chocolate': 3,
-        'Cherry': 4
-    };
-
-    const t_id = toppingMap[topping];
-    if (!t_id) {
-        return res.status(400).json({ error: "Invalid topping" });
+    if (!notes || typeof notes !== 'string') {
+        return res.status(400).json({ 
+            error: "Invalid notes",
+            details: "Notes must be a string"
+        });
     }
 
-    // Insert the new order into the database
-    dbms.dbquery(
-        `INSERT INTO orders (t_id, quantity, notes, month, year) VALUES (?, ?, ?, ?, ?)`,
-        [t_id, quantity, notes, 2, 2023], // Hardcode month and year for now
-        (error, results) => {
+    const sql = `
+        INSERT INTO orders (t_id, quantity, notes, month, year)
+        VALUES (?, ?, ?, ?, ?)
+    `;
+
+    dbms.dbquery(sql, 
+        [parseInt(t_id), parseInt(quantity), notes, parseInt(month), parseInt(year)],
+        (error, result) => {
             if (error) {
                 console.error("Database error:", error);
-                res.status(500).json({ error: "Failed to submit order" });
-            } else {
-                res.json({ success: true, message: "Order submitted successfully" });
+                return res.status(500).json({ 
+                    error: "Failed to save order",
+                    details: error.message
+                });
             }
+            
+            res.json({ 
+                success: true,
+                orderId: result.insertId,
+                message: "Order submitted successfully"
+            });
         }
     );
 });
