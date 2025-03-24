@@ -1,0 +1,7 @@
+{
+    "orders": [
+        { "topping": "plain", "quantity": 10 },
+        { "topping": "strawberry", "quantity": 5 },
+        { "topping": "chocolate", "quantity": 5 }
+    ]
+}

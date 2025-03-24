@@ -1,26 +1,34 @@
 //Rafael Copado
 
-
-var express = require('express');
+var express = require("express");
 var router = express.Router();
+const dbms = require("./dbms.js");
 
-//data
-const orders = [
-  { topping: "cherry", quantity: "2" },
-  { topping: "plain", quantity: "6" },
-  { topping: "chocolate", quantity: "3" }
-];
+router.post("/", function (req, res, next) {
+    const month = req.body.month; // Get the requested month from the client
+    const year = req.body.year;   // Get the requested year from the client
+    console.log(`Received POST request for orders in month: ${month}, year: ${year}`, req.body);
 
-router.get('/', function(req, res, next) {
-  console.log("Received GET request for /orders");
-  res.json(orders);
-});
+    if (!month || !year) {
+        return res.status(400).json({ error: "Month and year are required" });
+    }
 
-router.post('/', function(req, res, next) {
-  const month = req.body.month; //month request
-  console.log(`Received POST request for month: ${month}`);
+    // Query the database for orders in the specified month and year
+    const sql = `SELECT T_ID, QUANTITY, NOTES FROM orders WHERE MONTH = ? AND YEAR = ?`;
+    console.log("Executing query:", sql, "with params:", [month, year]);
 
-  res.json(orders);
+    dbms.dbquery(sql, [month, year], (error, results) => {
+        if (error) {
+            console.error("Database error:", error);
+            console.error("Failed query:", sql, "with params:", [month, year]);
+            res.status(500).json({ error: "Database query failed", details: error.message });
+        } else {
+            res.json({
+                success: true,
+                data: results
+            });
+        }
+    });
 });
 
 module.exports = router;

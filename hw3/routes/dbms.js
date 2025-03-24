@@ -1,82 +1,68 @@
 /**
- * dbms.js
- *
- * This file contains functions for accessing the MySQL database
- * which contains the Cheesecake order data.
- *
+ * dbms.js - Modern Database Manager
+ * 
+ * Handles MySQL connections and queries with parameterized query support
+ * Includes proper error handling and connection management
  */
 
-exports.version = '0.0.1';
+const mysql = require('mysql');
 
-
-var mysql = require('mysql'),
-    async = require('async');
-
-var host = "10.6.2.7";    //pdx0mysql00 IP address
-var database = "copado27_db";  //database name
-var user = "cs341-06";         //username (change to match your db)
-var password = "W-4cq7u5CKIw50-5";  //password (change to match your db, yes THIS IS VERY POOR PRACTICE)
+// Database configuration
+const dbConfig = {
+  host: "10.6.2.7",         // PDX0MySQL00 IP address
+  user: "cs341-06",         // Your database username
+  password: "W-4cq7u5CKIw50-5", // Your database password
+  database: "copado27_db",  // Your database name
+  multipleStatements: false // Prevent SQL injection
+};
 
 /**
- * dbquery
- *
- * performs a given SQL query on the database and returns the results
- * to the caller
- *
- * @param query     the SQL query to perform (e.g., "SELECT * FROM ...")
- * @param callback  the callback function to call with two values
- *                   error - (or 'false' if none)
- *                   results - as given by the mysql client
+ * Executes a parameterized SQL query
+ * @param {string} query_str - SQL query with ? placeholders
+ * @param {array} params - Array of parameter values
+ * @param {function} callback - Callback function (err, results)
  */
-exports.dbquery = function(query_str, callback) {
+exports.dbquery = function(query_str, params, callback) {
+  // Validate inputs
+  if (typeof query_str !== 'string') {
+    return callback(new Error('Query must be a string'));
+  }
+  
+  if (!Array.isArray(params)) {
+    return callback(new Error('Params must be an array'));
+  }
 
-    var dbclient;
-    var results = null;
-    
-    async.waterfall([
+  console.log(`Executing query: ${query_str}`);
+  console.log(`With parameters: ${JSON.stringify(params)}`);
 
-        //Step 1: Connect to the database
-        function (callback) {
-            console.log("\n** creating connection.");
-            dbclient = mysql.createConnection({
-                host: host,
-                user: user,
-                password: password,
-                database: database,
-            });
+  const connection = mysql.createConnection(dbConfig);
 
-            dbclient.connect(callback);
-        },
+  connection.connect((err) => {
+    if (err) {
+      console.error('Connection error:', err);
+      return callback(err);
+    }
 
-        //Step 2: Issue query
-        function (results, callback) {
-            console.log("\n** retrieving data");
-            dbclient.query(query_str, callback);
-        },
-
-        //Step 3: Collect results
-        function (rows, fields, callback) {
-            console.log("\n** dumping data:");
-            results = rows;
-            console.log("" + rows);
-            callback(null);
-        }
-
-    ],
-    // waterfall cleanup function
-    function (err, res) {
-        if (err) {
-            console.log("Database query failed.  sad");
-            console.log(err);
-            callback(err, null);
-        } else {
-            console.log("Database query completed.");
-            callback(false, results);
-        }
-
-        //close connection to database
-        dbclient.end();
-
+    connection.query(query_str, params, (queryErr, results) => {
+      // Always close the connection
+      connection.end();
+      
+      if (queryErr) {
+        console.error('Query error:', queryErr);
+        return callback(queryErr);
+      }
+      
+      callback(null, results);
     });
+  });
+};
 
-}//function dbquery
+/**
+ * Test database connection (optional)
+ */
+exports.testConnection = function(callback) {
+  this.dbquery('SELECT 1 + 1 AS test', [], (err, results) => {
+    if (err) return callback(err);
+    callback(null, results[0].test === 2);
+  });
+};
